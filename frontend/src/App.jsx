@@ -85,76 +85,137 @@ const isTeacher = (user) => {
   return user && user.category === "teacher";
 };
 
+// Protected route wrapper - redirects to login if not authenticated
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
+
 // New component to handle routes and authentication
 const AuthRoutes = ({ globeConfig, globeData }) => {
   const { isAuthenticated, user } = useAuth();
-  const isHomeRoute = location.pathname === "/";
+
   return (
     <div className="absolute top-0 left-0 w-full h-full z-10">
       <Routes>
-        {isAuthenticated ? (
-          <>
-            <Route
-              path="/"
-              element={
+        {/* Public routes - accessible to everyone */}
+        <Route
+          path="/"
+          element={
+            <>
+              <World globeConfig={globeConfig} data={globeData} />
+              <About />
+              <Contact />
+              <Footer />
+            </>
+          }
+        />
+        <Route path="/contact" element={<Contact />} />
+        <Route
+          path="/login"
+          element={isAuthenticated ? <Navigate to="/" /> : <Login />}
+        />
+
+        {/* Protected routes - require authentication */}
+        <Route
+          path="/courses"
+          element={
+            <ProtectedRoute>
+              <SquishyCard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/maps"
+          element={
+            <ProtectedRoute>
+              <GoogleMap />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher"
+          element={
+            <ProtectedRoute>
+              {isTeacher(user) ? (
+                <Navigate to="/" />
+              ) : (
                 <>
-                  <World globeConfig={globeConfig} data={globeData} />
-                  <About />
-
-                  <Contact />
-                  <Footer />
+                  <Teacher />
+                  <Fiels />
                 </>
-              }
-            />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/courses" element={<SquishyCard />} />
-            <Route path="/maps" element={<GoogleMap />} />
-
-            {/* Check if user is defined and has a teacher role */}
-            {isTeacher(user) ? (
-              <Route path="/teacher" element={<Navigate to="/" />} />
-            ) : (
-              <Route
-                path="/teacher"
-                element={
-                  <>
-                    <Teacher />
-                    <Fiels />
-                  </>
-                }
-              />
-            )}
-
-            <Route
-              path="/learning/lightfundamentals"
-              element={
-                <>
-                  <LightFundamentals />
-                  <VideoCources />
-                </>
-              }
-            />
-            <Route path="/learning/phytoplankton" element={<Phytoplankton />} />
-            <Route path="/learning/ownpace" element={<OwnPace />} />
-            <Route path="/learning/fetchNASAData" element={<FetchNASAData />} />
-            <Route
-              path="/learning/teacherUploads"
-              element={<TeacherUploads />}
-            />
-            <Route
-              path="/video-learning"
-              element={<VideoLearning className="z-50" />}
-            />
-            <Route path="/game" element={<Game />} />
-            <Route path="/game1" element={<Game1 />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </>
-        ) : (
-          <>
-            <Route path="/" element={<Navigate to="/login" />} />
-            <Route path="/login" element={<Login />} />
-          </>
-        )}
+              )}
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/lightfundamentals"
+          element={
+            <ProtectedRoute>
+              <>
+                <LightFundamentals />
+                <VideoCources />
+              </>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/phytoplankton"
+          element={
+            <ProtectedRoute>
+              <Phytoplankton />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/ownpace"
+          element={
+            <ProtectedRoute>
+              <OwnPace />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/fetchNASAData"
+          element={
+            <ProtectedRoute>
+              <FetchNASAData />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/teacherUploads"
+          element={
+            <ProtectedRoute>
+              <TeacherUploads />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/video-learning"
+          element={
+            <ProtectedRoute>
+              <VideoLearning className="z-50" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game"
+          element={
+            <ProtectedRoute>
+              <Game />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game1"
+          element={
+            <ProtectedRoute>
+              <Game1 />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
   );
